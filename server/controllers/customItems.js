@@ -13,15 +13,19 @@ export const createCustomItem = async (req, res) => {
     } = req.body;
 
     const allowedBoards = new Set(["green", "black-white", "wooden"]);
+    const allowedMaterials = new Set(["glass", "stone", "wood"]);
+    const materialBoardMap = {
+      glass: "green",
+      stone: "black-white",
+      wood: "wooden",
+    };
 
     if (
       !base_piece_id ||
       !custom_name ||
       !selected_color ||
       !selected_board ||
-      !selected_material ||
-      price == null ||
-      !image_path
+      !selected_material
     ) {
       return res.status(400).json({ error: "Missing required fields." });
     }
@@ -32,30 +36,37 @@ export const createCustomItem = async (req, res) => {
         .json({ error: "Please choose a valid chessboard option." });
     }
 
-    const variantQuery = `
-      SELECT id, price, image_path
-      FROM chess
-      WHERE id = $1
-        AND LOWER(pieceColor) = LOWER($2)
-        AND LOWER(material) = LOWER($3)
-    `;
+    if (!allowedMaterials.has(String(selected_material).toLowerCase())) {
+      return res
+        .status(400)
+        .json({ error: "Please choose a valid material option." });
+    }
 
-    const variantResult = await pool.query(variantQuery, [
-      base_piece_id,
-      selected_color,
-      selected_material,
-    ]);
-
-    if (variantResult.rowCount === 0) {
+    // Enforce Material ↔ Board compatibility
+    const mat = String(selected_material).toLowerCase();
+    const brd = String(selected_board).toLowerCase();
+    const expectedBoard = materialBoardMap[mat];
+    if (expectedBoard && brd !== expectedBoard) {
       return res.status(400).json({
-        error:
-          "Invalid feature combination. Please select a valid piece configuration.",
+        error: `Material "${mat}" is only compatible with "${expectedBoard}" board.`,
       });
     }
 
-    const variantRow = variantResult.rows[0];
-    const resolvedPrice = price ?? variantRow.price;
-    const resolvedImage = image_path ?? variantRow.image_path;
+    // Validate base piece exists and use its price/image when not provided
+    const baseQuery = `
+      SELECT id, price, image_path
+      FROM chess
+      WHERE id = $1
+    `;
+    const baseResult = await pool.query(baseQuery, [base_piece_id]);
+
+    if (baseResult.rowCount === 0) {
+      return res.status(404).json({ error: "Base piece not found." });
+    }
+
+    const baseRow = baseResult.rows[0];
+    const resolvedPrice = price ?? baseRow.price;
+    const resolvedImage = image_path ?? baseRow.image_path;
 
     const insertQuery = `
       INSERT INTO custom_items (
@@ -181,6 +192,12 @@ export const updateCustomItem = async (req, res) => {
   } = req.body;
 
   const allowedBoards = new Set(["green", "black-white", "wooden"]);
+  const allowedMaterials = new Set(["glass", "stone", "wood"]);
+  const materialBoardMap = {
+    glass: "green",
+    stone: "black-white",
+    wood: "wooden",
+  };
 
   if (
     !base_piece_id ||
@@ -197,30 +214,37 @@ export const updateCustomItem = async (req, res) => {
       .status(400)
       .json({ error: "Please choose a valid chessboard option." });
   }
+  if (!allowedMaterials.has(String(selected_material).toLowerCase())) {
+    return res
+      .status(400)
+      .json({ error: "Please choose a valid material option." });
+  }
+  // Enforce Material ↔ Board compatibility
+  {
+    const mat = String(selected_material).toLowerCase();
+    const brd = String(selected_board).toLowerCase();
+    const expectedBoard = materialBoardMap[mat];
+    if (expectedBoard && brd !== expectedBoard) {
+      return res.status(400).json({
+        error: `Material "${mat}" is only compatible with "${expectedBoard}" board.`,
+      });
+    }
+  }
 
   try {
-    const variantQuery = `
+    // Validate base piece exists and use its price/image when not provided
+    const baseQuery = `
       SELECT id, price, image_path
       FROM chess
       WHERE id = $1
-        AND LOWER(pieceColor) = LOWER($2)
-        AND LOWER(material) = LOWER($3)
     `;
+    const baseResult = await pool.query(baseQuery, [base_piece_id]);
 
-    const variantResult = await pool.query(variantQuery, [
-      base_piece_id,
-      selected_color,
-      selected_material,
-    ]);
-
-    if (variantResult.rowCount === 0) {
-      return res.status(400).json({
-        error:
-          "Invalid feature combination. Please select a valid piece configuration.",
-      });
+    if (baseResult.rowCount === 0) {
+      return res.status(404).json({ error: "Base piece not found." });
     }
 
-    const variantRow = variantResult.rows[0];
+    const baseRow = baseResult.rows[0];
 
     const updateQuery = `
       UPDATE custom_items
@@ -241,8 +265,8 @@ export const updateCustomItem = async (req, res) => {
       selected_color,
       selected_board,
       selected_material,
-      price ?? variantRow.price,
-      image_path ?? variantRow.image_path,
+      price ?? baseRow.price,
+      image_path ?? baseRow.image_path,
       id,
     ]);
 

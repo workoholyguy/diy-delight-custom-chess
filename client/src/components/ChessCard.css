@@ -1,0 +1,26 @@
+.card__media {
+  position: relative;
+  background-color: #eef0f8;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  min-height: 180px;
+  aspect-ratio: 1;
+  overflow: hidden;
+}
+
+.card__board {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.card__piece {
+  position: relative;
+  z-index: 1;
+  width: 65%;
+  max-width: 180px;
+  height: auto;
+}

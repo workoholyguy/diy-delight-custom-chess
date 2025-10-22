@@ -29,6 +29,13 @@ const MATERIAL_OPTIONS = [
   { value: "wood", label: "Wood" },
 ];
 
+// Material ↔ Board compatibility map
+const MATERIAL_BOARD_MAP = {
+  glass: "green",
+  stone: "black-white",
+  wood: "wooden",
+};
+
 const findBoardOption = (board) => {
   const normalized = (board ?? "").toLowerCase();
   return (
@@ -98,23 +105,13 @@ const PieceDetails = ({
     );
   }, [piece, variants, normalizedSelectedColor]);
 
-  const materials = useMemo(() => {
-    return Array.from(
-      new Set(
-        variantsForColor.map((variant) =>
-          (variant.material ?? "wood").toLowerCase()
-        )
-      )
-    ).filter(Boolean);
-  }, [variantsForColor]);
+  // Allow selecting any supported material regardless of dataset variants
+  const allowedMaterialValues = useMemo(
+    () => MATERIAL_OPTIONS.map((o) => o.value),
+    []
+  );
 
-  const availableMaterialOptions = useMemo(() => {
-    const materialSet = new Set(materials);
-    const filtered = MATERIAL_OPTIONS.filter((option) =>
-      materialSet.has(option.value)
-    );
-    return filtered.length > 0 ? filtered : MATERIAL_OPTIONS;
-  }, [materials]);
+  const availableMaterialOptions = MATERIAL_OPTIONS;
 
   useEffect(() => {
     if (!piece) return;
@@ -138,9 +135,9 @@ const PieceDetails = ({
       ? defaultBoard
       : boardValues[0] ?? defaultBoard;
 
-    const resolvedMaterial = materials.includes(defaultMaterial)
+    const resolvedMaterial = allowedMaterialValues.includes(defaultMaterial)
       ? defaultMaterial
-      : materials[0] ?? defaultMaterial;
+      : allowedMaterialValues[0] ?? "wood";
 
     const currentColor = (selectedColor ?? "").toLowerCase();
     const currentBoard = (selectedBoard ?? "").toLowerCase();
@@ -154,13 +151,13 @@ const PieceDetails = ({
       setSelectedBoard(resolvedBoard || BOARD_OPTIONS[0].value);
     }
 
-    if (!materials.includes(currentMaterial)) {
+    if (!allowedMaterialValues.includes(currentMaterial)) {
       setSelectedMaterial(resolvedMaterial || "wood");
     }
   }, [
     piece,
     colors,
-    materials,
+    allowedMaterialValues,
     isEditing,
     customItem?.selected_board,
     customItem?.selected_color,
@@ -181,6 +178,14 @@ const PieceDetails = ({
       findBoardOption(selectedBoard),
     [selectedBoard]
   );
+
+  // Compatibility check between selected material and board
+  const isComboCompatible = useMemo(() => {
+    const mat = (selectedMaterial ?? "").toLowerCase();
+    const brd = (selectedBoard ?? "").toLowerCase();
+    const expected = MATERIAL_BOARD_MAP[mat];
+    return !expected || expected === brd;
+  }, [selectedMaterial, selectedBoard]);
 
   const exactVariant = useMemo(() => {
     if (!piece) return null;
@@ -220,8 +225,19 @@ const PieceDetails = ({
   }, [piece, selectedColor, isEditing]);
 
   const handleSave = async () => {
-    if (!piece || !exactVariant) {
-      setSaveError("Please choose a valid combination.");
+    if (!piece) {
+      setSaveError("Piece not available to save.");
+      return;
+    }
+
+    if (!isComboCompatible) {
+      const mat = (selectedMaterial ?? "").toLowerCase();
+      const expected = MATERIAL_BOARD_MAP[mat];
+      setSaveError(
+        `This combination is not allowed. Material "${formatLabel(
+          mat
+        )}" requires the "${formatLabel(expected)}" board.`
+      );
       return;
     }
 
@@ -229,14 +245,14 @@ const PieceDetails = ({
     setSaveError(null);
 
     const payload = {
-      base_piece_id: exactVariant?.id ?? piece.id,
+      base_piece_id: previewVariant?.id ?? piece.id,
       custom_name: customName,
       selected_color: selectedColor,
       selected_board: selectedBoard,
       selected_material: selectedMaterial,
-      price: Number(exactVariant.price ?? piece.price ?? 0),
+      price: Number(previewVariant?.price ?? piece.price ?? 0),
       image_path:
-        exactVariant.image_path ??
+        previewVariant?.image_path ??
         customItem?.image_path ??
         piece.image_path,
     };
@@ -411,6 +427,21 @@ const PieceDetails = ({
             />
             <figcaption>{activeBoardOption.label} board</figcaption>
           </figure>
+          <p className="piece-detail__note">
+            Compatibility: Wood → Wooden, Glass → Classic (Green), Stone →
+            Black/White. Incompatible combinations cannot be saved.
+          </p>
+          {!isComboCompatible && (
+            <p className="piece-detail__error" role="alert">
+              Selected material and board are incompatible. Please choose the
+              {" "}
+              {formatLabel(
+                MATERIAL_BOARD_MAP[(selectedMaterial ?? "").toLowerCase()]
+              )}
+              {" "}
+              board for {formatLabel(selectedMaterial)} material.
+            </p>
+          )}
         </fieldset>
       </div>
 

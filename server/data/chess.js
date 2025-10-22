@@ -1,0 +1,178 @@
+// server/data/chess.js
+const chessData = [
+  // 🧱 Pawns
+  {
+    name: "pawn",
+    pieceColor: "white",
+    chessboard: "wooden",
+    material: "wood",
+    image_path: "/Pawns/white-pawn.png",
+    description: "Classic white pawn on a wooden board.",
+    price: 5.0,
+  },
+  {
+    name: "pawn",
+    pieceColor: "black",
+    chessboard: "wooden",
+    material: "wood",
+    image_path: "/Pawns/black-pawn.png",
+    description: "Classic black pawn on a wooden board.",
+    price: 5.0,
+  },
+  {
+    name: "pawn",
+    pieceColor: "color",
+    chessboard: "wooden",
+    material: "wood",
+    image_path: "/Pawns/colorfull-pawn.png",
+    description: "Colorful pawn for a playful look.",
+    price: 5.0,
+  },
+
+  // 🏰 Rooks
+  {
+    name: "rook",
+    pieceColor: "white",
+    chessboard: "green",
+    material: "glass",
+    image_path: "/Rooks/white-rook.png",
+    description: "White rook on green board.",
+    price: 7.5,
+  },
+  {
+    name: "rook",
+    pieceColor: "black",
+    chessboard: "green",
+    material: "glass",
+    image_path: "/Rooks/black-rook.png",
+    description: "Black rook on green board.",
+    price: 7.5,
+  },
+  {
+    name: "rook",
+    pieceColor: "color",
+    chessboard: "green",
+    material: "glass",
+    image_path: "/Rooks/color-rook.png",
+    description: "Vibrant rook for modern sets.",
+    price: 7.5,
+  },
+
+  // 🐎 Knights
+  {
+    name: "knight",
+    pieceColor: "white",
+    chessboard: "black-white",
+    material: "stone",
+    image_path: "/Knights/white-knight.png",
+    description: "White knight with classic elegance.",
+    price: 8.0,
+  },
+  {
+    name: "knight",
+    pieceColor: "black",
+    chessboard: "black-white",
+    material: "stone",
+    image_path: "/Knights/black-knight.png",
+    description: "Black knight — timeless contrast.",
+    price: 8.0,
+  },
+  {
+    name: "knight",
+    pieceColor: "color",
+    chessboard: "black-white",
+    material: "stone",
+    image_path: "/Knights/color-knight.png",
+    description: "Colorful knight for a bold set.",
+    price: 8.0,
+  },
+
+  // 🏆 Kings
+  {
+    name: "king",
+    pieceColor: "white",
+    chessboard: "wooden",
+    material: "wood",
+    image_path: "/Kings/white-king.png",
+    description: "White king — classic centerpiece.",
+    price: 10.0,
+  },
+  {
+    name: "king",
+    pieceColor: "black",
+    chessboard: "wooden",
+    material: "wood",
+    image_path: "/Kings/black-king.png",
+    description: "Black king — strong contrast style.",
+    price: 10.0,
+  },
+  {
+    name: "king",
+    pieceColor: "color",
+    chessboard: "wooden",
+    material: "wood",
+    image_path: "/Kings/color-king.png",
+    description: "Modern colorful king.",
+    price: 10.0,
+  },
+
+  // 👑 Queens
+  {
+    name: "queen",
+    pieceColor: "white",
+    chessboard: "black-white",
+    material: "stone",
+    image_path: "/Queens/white-queen.png",
+    description: "White queen on classic board.",
+    price: 9.0,
+  },
+  {
+    name: "queen",
+    pieceColor: "black",
+    chessboard: "black-white",
+    material: "stone",
+    image_path: "/Queens/black-queen.png",
+    description: "Black queen for bold setups.",
+    price: 9.0,
+  },
+  {
+    name: "queen",
+    pieceColor: "color",
+    chessboard: "black-white",
+    material: "stone",
+    image_path: "/Queens/color-queen.png",
+    description: "Colorful queen — elegant and bright.",
+    price: 9.0,
+  },
+
+  // ⛪ Bishops
+  {
+    name: "bishop",
+    pieceColor: "white",
+    chessboard: "green",
+    material: "glass",
+    image_path: "/Bishop/white-bishop.png",
+    description: "White bishop on green chessboard.",
+    price: 7.0,
+  },
+  {
+    name: "bishop",
+    pieceColor: "black",
+    chessboard: "green",
+    material: "glass",
+    image_path: "/Bishop/black-bishop.png",
+    description: "Black bishop — sharp contrast design.",
+    price: 7.0,
+  },
+  {
+    name: "bishop",
+    pieceColor: "color",
+    chessboard: "green",
+    material: "glass",
+    image_path: "/Bishop/color-bishop.png",
+    description: "Colorful bishop for creative sets.",
+    price: 7.0,
+  },
+];
+
+export default chessData;
